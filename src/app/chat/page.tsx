@@ -3,6 +3,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { MainConductor, CoachingSession, CoachingResponse, BusinessContext } from '@/lib/agents/main-conductor';
+import { MessageRenderer } from '@/components/chat/MessageRenderer';
+import { ActionItemsList } from '@/components/chat/ActionItemCard';
+import { IntelligentAgentRouter, QueryAnalysis, RoutingDecision } from '@/lib/agents/IntelligentAgentRouter';
+import { AgentMemorySystem, ConversationTurn } from '@/lib/agents/AgentMemory';
+import { AgentCollaborationViz } from '@/components/agents/AgentCollaborationViz';
+import { AgentReasoningDisplay } from '@/components/agents/AgentReasoningDisplay';
+import { AgentAnalytics } from '@/components/agents/AgentAnalytics';
+import { Brain, Settings, BarChart, Eye, EyeOff } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -16,6 +24,9 @@ interface Message {
     evidence: string;
     nextConstraint: string;
   };
+  routingDecision?: RoutingDecision;
+  queryAnalysis?: QueryAnalysis;
+  executionTime?: number;
 }
 
 export default function ChatPage() {
@@ -28,8 +39,18 @@ export default function ChatPage() {
   const [sessionType, setSessionType] = useState<'diagnostic' | 'strategic' | 'implementation'>('diagnostic');
   const [showContextForm, setShowContextForm] = useState(true);
   
+  // Agent Intelligence State
+  const [showAgentDetails, setShowAgentDetails] = useState(false);
+  const [showCollaboration, setShowCollaboration] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [activeCollaboration, setActiveCollaboration] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState('');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const conductor = useRef<MainConductor>(new MainConductor());
+  const router = useRef<IntelligentAgentRouter>(new IntelligentAgentRouter());
+  const memory = useRef<AgentMemorySystem>(new AgentMemorySystem());
+  const sessionId = useRef<string>(Date.now().toString());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -42,9 +63,13 @@ export default function ChatPage() {
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    const startTime = Date.now();
+    const query = input.trim();
+    setCurrentQuery(query);
+
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: query,
       sender: 'user',
       timestamp: new Date()
     };
@@ -53,15 +78,33 @@ export default function ChatPage() {
     setInput('');
     setIsLoading(true);
 
+    // Show collaboration visualization for complex queries
+    const quickAnalysis = router.current.analyzeQuery(query, businessContext);
+    if (quickAnalysis.complexity === 'complex' || quickAnalysis.complexity === 'strategic') {
+      setActiveCollaboration(true);
+      setShowCollaboration(true);
+    }
+
     try {
+      // Get routing decision
+      const routingDecision = router.current.routeQuery(query, businessContext, sessionType);
+      
+      // Get contextual recommendations from memory
+      const contextualRecs = memory.current.getContextualRecommendations(
+        sessionId.current, 
+        query, 
+        'demo-user'
+      );
+
       const session: CoachingSession = {
         userId: 'demo-user',
         businessContext,
-        query: input,
+        query: query,
         sessionType
       };
 
       const response = await conductor.current.conductCoachingSession(session);
+      const executionTime = Date.now() - startTime;
       
       // Extract constraint analysis from agent responses
       const constraintAnalysis = response.analysis?.find(a => a.agentType === 'constraint-analyzer');
@@ -73,7 +116,10 @@ export default function ChatPage() {
         sender: 'ai',
         timestamp: new Date(),
         analysis: response,
-        agent: 'Alex Hormozi AI Orchestra',
+        agent: routingDecision.primary.agent,
+        routingDecision,
+        queryAnalysis: quickAnalysis,
+        executionTime,
         constraint: constraintAnalysis ? {
           primary: constraintAnalysis.metrics?.primaryConstraint || 'Unknown',
           evidence: constraintAnalysis.findings?.[1] || 'Not provided',
@@ -82,6 +128,30 @@ export default function ChatPage() {
       };
 
       setMessages(prev => [...prev, aiMessage]);
+
+      // Add to memory system
+      const conversationTurn: ConversationTurn = {
+        id: aiMessage.id,
+        timestamp: aiMessage.timestamp,
+        userQuery: query,
+        agentResponse: response.synthesis,
+        selectedAgent: routingDecision.primary.agent,
+        queryAnalysis: quickAnalysis,
+        success: true, // Assume success for now, could be enhanced with feedback
+        executionTime,
+        insights: response.analysis?.flatMap(a => a.findings || []) || [],
+        followUpSuggestions: response.nextSteps || []
+      };
+
+      memory.current.addConversationTurn(sessionId.current, conversationTurn, 'demo-user');
+
+      // Update agent performance
+      router.current.updateAgentPerformance(
+        routingDecision.primary.agent, 
+        routingDecision.primary.confidence, 
+        true
+      );
+
     } catch (error) {
       console.error('Error getting response:', error);
       const errorMessage: Message = {
@@ -93,6 +163,7 @@ export default function ChatPage() {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setActiveCollaboration(false);
     }
   };
 
@@ -264,15 +335,95 @@ export default function ChatPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowContextForm(true)}
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all"
-            >
-              Update Context
-            </button>
+            
+            <div className="flex items-center space-x-3">
+              {/* Agent Intelligence Controls */}
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg p-2">
+                <button
+                  onClick={() => setShowAgentDetails(!showAgentDetails)}
+                  className={`p-2 rounded-lg transition-all ${showAgentDetails ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/20'}`}
+                  title="Toggle Agent Reasoning"
+                >
+                  {showAgentDetails ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+                
+                <button
+                  onClick={() => setShowCollaboration(!showCollaboration)}
+                  className={`p-2 rounded-lg transition-all ${showCollaboration ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/20'}`}
+                  title="Toggle Collaboration View"
+                >
+                  <Brain className="w-4 h-4" />
+                </button>
+                
+                <button
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className={`p-2 rounded-lg transition-all ${showAnalytics ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/20'}`}
+                  title="Toggle Analytics"
+                >
+                  <BarChart className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <button
+                onClick={() => setShowContextForm(true)}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all"
+              >
+                Update Context
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Agent Intelligence Panels */}
+      {(showCollaboration || showAgentDetails || showAnalytics) && (
+        <div className="border-b border-white/10 bg-black/10 backdrop-blur-lg">
+          <div className="container mx-auto px-4 py-4">
+            <div className="max-w-4xl mx-auto space-y-4">
+              
+              {/* Collaboration Visualization */}
+              {showCollaboration && (
+                <AgentCollaborationViz
+                  query={currentQuery}
+                  isActive={activeCollaboration}
+                  onAnalysisComplete={(results) => {
+                    console.log('Collaboration analysis complete:', results);
+                  }}
+                />
+              )}
+              
+              {/* Agent Reasoning */}
+              {showAgentDetails && messages.length > 0 && (
+                (() => {
+                  const lastAiMessage = messages.slice().reverse().find(m => m.sender === 'ai' && m.routingDecision && m.queryAnalysis);
+                  return lastAiMessage && lastAiMessage.routingDecision && lastAiMessage.queryAnalysis ? (
+                    <AgentReasoningDisplay
+                      queryAnalysis={lastAiMessage.queryAnalysis}
+                      primaryAgent={lastAiMessage.routingDecision.primary}
+                      secondaryAgents={lastAiMessage.routingDecision.secondary}
+                      collaborativeMode={lastAiMessage.routingDecision.collaborativeMode}
+                      executionPlan={lastAiMessage.routingDecision.executionPlan}
+                      reasoning={lastAiMessage.routingDecision.reasoning}
+                    />
+                  ) : (
+                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 text-center">
+                      <Brain className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+                      <p className="text-white font-medium mb-2">Agent Intelligence Ready</p>
+                      <p className="text-gray-400 text-sm">Send a message to see detailed agent reasoning and decision-making process.</p>
+                    </div>
+                  );
+                })()
+              )}
+              
+              {/* Agent Analytics */}
+              {showAnalytics && (
+                <AgentAnalytics isLive={true} />
+              )}
+              
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="container mx-auto px-4 pb-24">
@@ -293,7 +444,10 @@ export default function ChatPage() {
                     </div>
                   )}
                   
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                  <MessageRenderer 
+                    content={message.content} 
+                    sender={message.sender}
+                  />
                   
                   {/* Constraint Analysis Display */}
                   {message.constraint && (
@@ -323,26 +477,15 @@ export default function ChatPage() {
                     <div className="mt-6 space-y-4">
                       {/* Action Items */}
                       {message.analysis.actionItems.length > 0 && (
-                        <div>
-                          <h4 className="text-lg font-semibold text-purple-300 mb-3">🎯 Priority Actions</h4>
-                          <div className="space-y-2">
-                            {message.analysis.actionItems.slice(0, 5).map((item, index) => (
-                              <div key={index} className="bg-white/10 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className={`px-2 py-1 text-xs rounded-full ${
-                                    item.priority === 'critical' ? 'bg-red-500' :
-                                    item.priority === 'high' ? 'bg-orange-500' :
-                                    item.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                                  }`}>
-                                    {item.priority}
-                                  </span>
-                                  <span className="text-sm text-gray-300">{item.timeline}</span>
-                                </div>
-                                <p className="text-sm">{item.title}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                        <ActionItemsList 
+                          actionItems={message.analysis.actionItems.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: item.description || 'Implementation details will be provided.',
+                            priority: item.priority,
+                            timeline: item.timeline,
+                            frameworks: item.frameworks || []
+                          }))}
+                        />
                       )}
 
                       {/* Next Steps */}

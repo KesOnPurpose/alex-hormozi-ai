@@ -18,7 +18,7 @@ export default function HomePage() {
           </p>
 
           <div className="text-lg text-gray-400 italic mb-12 max-w-2xl mx-auto">
-            "After meeting with 1,260+ businesses in person, we codified everything into a system that works every time." - Alex Hormozi
+            &quot;After meeting with 1,260+ businesses in person, we codified everything into a system that works every time.&quot; - Alex Hormozi
           </div>
           
           {/* Single Powerful CTA */}
@@ -55,7 +55,14 @@ export default function HomePage() {
               <span className="text-sm">Already know your constraint? </span>
               <span className="text-purple-400 underline">Skip to specific frameworks</span>
             </summary>
-            <div className="grid md:grid-cols-2 gap-4 mt-6">
+            <div className="grid md:grid-cols-3 gap-4 mt-6">
+              <ActionCard
+                title="Business Templates"
+                description="Proven frameworks"
+                icon="📋"
+                href="/business-templates"
+                compact={true}
+              />
               <ActionCard
                 title="Constraint Analysis"
                 description="Identify your bottleneck"
@@ -75,6 +82,13 @@ export default function HomePage() {
                 description="Grand Slam Offers"
                 icon="💎"
                 href="/agents/offer-analyzer"
+                compact={true}
+              />
+              <ActionCard
+                title="Progress Tracker"
+                description="Monitor growth"
+                icon="📊"
+                href="/progress"
                 compact={true}
               />
               <ActionCard
@@ -151,7 +165,7 @@ function PrincipleCard({ quote, principle }: {
   return (
     <div className="bg-white/5 backdrop-blur-lg rounded-lg p-6 border border-white/10">
       <div className="text-purple-400 font-semibold mb-2">{principle}</div>
-      <div className="text-gray-300 italic">"{quote}"</div>
+      <div className="text-gray-300 italic">&quot;{quote}&quot;</div>
     </div>
   )
 }

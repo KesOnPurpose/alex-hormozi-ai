@@ -23,7 +23,6 @@ export default function AgentsPage() {
   const router = useRouter()
   const [businessProfile, setBusinessProfile] = useState<any>(null)
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
-  const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('businessProfile')
@@ -206,7 +205,7 @@ export default function AgentsPage() {
             AI Coaching Orchestra
           </h1>
           <p className="text-lg text-gray-300 mb-6">
-            8 specialized agents trained on Alex Hormozi's frameworks from 1,260+ business consultations
+            8 specialized agents trained on Alex Hormozi&apos;s frameworks from 1,260+ business consultations
           </p>
 
           {businessProfile && (

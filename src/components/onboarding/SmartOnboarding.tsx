@@ -351,7 +351,7 @@ function WelcomeStep() {
         Ready to Transform Your Business?
       </h3>
       <p className="text-gray-300 text-lg mb-6">
-        I'm Alex Hormozi AI, and I'll help you identify and solve your biggest business constraints 
+        I&apos;m Alex Hormozi AI, and I&apos;ll help you identify and solve your biggest business constraints 
         using proven frameworks from over 1,260 business consultations.
       </p>
       <div className="bg-purple-900/30 rounded-lg p-6 border border-purple-400/30">

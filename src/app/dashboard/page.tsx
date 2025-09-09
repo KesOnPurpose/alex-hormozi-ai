@@ -1,15 +1,27 @@
 'use client'
 
 import Link from 'next/link'
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
+import { CFAChart } from '@/components/dashboard/CFAChart'
+import { LiveMetricCard } from '@/components/dashboard/LiveMetricCard'
+import { ConstraintTracker } from '@/components/dashboard/ConstraintTracker'
 
 export default function DashboardPage() {
-  // Mock data for demonstration
+  // Mock business metrics data
   const businessMetrics = {
-    cac: 250,
-    thirtyDayGP: 520,
+    cac: 125,
+    thirtyDayGP: 8950,
     ltv: 2400,
-    paybackPeriod: 1.2,
-    level: "Level 2 - Self-Funding Growth"
+    paybackPeriod: 1.8,
+    level: getBusinessLevel(8950)
+  }
+
+  function getBusinessLevel(revenue: number): string {
+    if (revenue === 0) return "Getting Started - Set up your money model"
+    if (revenue < 10000) return "Level 1 - Survival Mode"
+    if (revenue < 30000) return "Level 2 - Self-Funding Growth"
+    if (revenue < 100000) return "Level 3 - Scaling Operations"
+    return "Level 4 - Market Domination"
   }
 
   const recentAnalyses = [
@@ -84,35 +96,84 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <MetricCard
+        {/* Live Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
+          <LiveMetricCard
+            title="Monthly Revenue"
+            value={businessMetrics.thirtyDayGP}
+            subtitle="Current Revenue"
+            format="currency"
+            target={businessMetrics.thirtyDayGP * 1.5}
+            trendPositive={true}
+            volatility={0.03}
+          />
+          <LiveMetricCard
+            title="Projected Revenue"
+            value={businessMetrics.thirtyDayGP * 1.35}
+            subtitle="Growth Projection"
+            format="currency"
+            trendPositive={true}
+            volatility={0.05}
+          />
+          <LiveMetricCard
             title="CAC"
-            value={`$${businessMetrics.cac}`}
+            value={businessMetrics.cac}
             subtitle="Customer Acquisition Cost"
-            trend="+12%"
+            format="currency"
+            target={100}
             trendPositive={false}
+            volatility={0.02}
           />
-          <MetricCard
-            title="30-Day GP"
-            value={`$${businessMetrics.thirtyDayGP}`}
-            subtitle="30-Day Gross Profit"
-            trend="+24%"
-            trendPositive={true}
-          />
-          <MetricCard
+          <LiveMetricCard
             title="LTV"
-            value={`$${businessMetrics.ltv}`}
+            value={businessMetrics.ltv}
             subtitle="Lifetime Value"
-            trend="+18%"
+            format="currency"
+            target={3000}
             trendPositive={true}
+            volatility={0.04}
           />
-          <MetricCard
-            title="Payback"
-            value={`${businessMetrics.paybackPeriod} mo`}
-            subtitle="Payback Period"
-            trend="-0.3 mo"
+          <LiveMetricCard
+            title="Active Offers"
+            value={4}
+            subtitle="In Money Model"
+            format="number"
+            target={6}
             trendPositive={true}
+            volatility={0.01}
+          />
+          <LiveMetricCard
+            title="Payback Period"
+            value={businessMetrics.paybackPeriod}
+            subtitle="Break-even Time (months)"
+            format="number"
+            target={1}
+            trendPositive={false}
+            volatility={0.02}
+          />
+        </div>
+
+        {/* Analytics Charts */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+          <RevenueChart 
+            currentRevenue={businessMetrics.thirtyDayGP}
+            targetRevenue={businessMetrics.thirtyDayGP * 1.5}
+          />
+          <CFAChart 
+            currentCAC={businessMetrics.cac}
+            currentGP={businessMetrics.thirtyDayGP}
+          />
+        </div>
+
+        {/* Constraint Analysis */}
+        <div className="mb-12">
+          <ConstraintTracker 
+            businessData={{
+              leads: 150,
+              conversionRate: 18,
+              customerSatisfaction: 82,
+              profitMargin: 45
+            }}
           />
         </div>
 
@@ -171,6 +232,24 @@ export default function DashboardPage() {
                 description="Share insights with team"
                 icon="👥"
                 onClick={() => {}}
+              />
+              <ActionButton
+                title="A/B Testing"
+                description="Manage experiments and optimization tests"
+                icon="🧪"
+                href="/settings?tab=abtesting"
+              />
+              <ActionButton
+                title="Health Monitoring"
+                description="System performance and uptime monitoring"
+                icon="🏥"
+                href="/settings?tab=monitoring"
+              />
+              <ActionButton
+                title="Test Examples"
+                description="Interactive A/B testing examples"
+                icon="🎯"
+                href="/ab-test-demo"
               />
             </div>
           </div>

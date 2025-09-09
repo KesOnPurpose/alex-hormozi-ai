@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       agent: 'fallback-coach',
       timestamp: new Date().toISOString(),
-      synthesis: `I understand you're looking for coaching on: "${(await request.json()).query}". 
+      synthesis: `I understand you're looking for coaching on: "${body.query}". 
 
 🎯 **Based on Alex Hormozi's 4 Universal Business Constraints:**
 

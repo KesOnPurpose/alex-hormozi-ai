@@ -1,12 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { DocumentAnalyzer, AnalysisResult } from '@/components/analysis/DocumentAnalyzer'
+import { AnalysisResults } from '@/components/analysis/AnalysisResults'
 
 export default function UploadPage() {
+  const router = useRouter()
   const [dragActive, setDragActive] = useState(false)
   const [files, setFiles] = useState<File[]>([])
+  const [textInput, setTextInput] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([])
+  const [showResults, setShowResults] = useState(false)
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -40,13 +47,43 @@ export default function UploadPage() {
     setFiles(prev => prev.filter((_, i) => i !== index))
   }
 
-  const analyzeFiles = async () => {
+  const handleAnalysisStart = () => {
     setProcessing(true)
-    // TODO: Process files with Alex AI
-    setTimeout(() => {
-      setProcessing(false)
-      // Redirect to results or chat
-    }, 2000)
+  }
+
+  const handleAnalysisComplete = (results: AnalysisResult[]) => {
+    setAnalysisResults(results)
+    setProcessing(false)
+    setShowResults(true)
+  }
+
+  const handleViewAgent = (agentType: string) => {
+    router.push(`/agents/${agentType}`)
+  }
+
+  const handleDownloadReport = () => {
+    // Create and download PDF report
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      results: analysisResults
+    }
+    
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `hormozi-analysis-${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const resetAnalysis = () => {
+    setShowResults(false)
+    setAnalysisResults([])
+    setFiles([])
+    setTextInput('')
   }
 
   return (
@@ -65,138 +102,115 @@ export default function UploadPage() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          {/* Upload Zone */}
-          <div
-            className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
-              dragActive 
-                ? 'border-purple-400 bg-purple-400/10' 
-                : 'border-gray-600 hover:border-purple-400'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <div className="text-6xl mb-4">📁</div>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              Drag & Drop Files Here
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Or click to select files (PDF, TXT, DOCX, MD)
-            </p>
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              onChange={handleFileSelect}
-              multiple
-              accept=".pdf,.txt,.docx,.md"
-            />
-            <label
-              htmlFor="file-upload"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg cursor-pointer transition-colors inline-block"
-            >
-              Select Files
-            </label>
-          </div>
-
-          {/* Text Input */}
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-white mb-4">Or Paste Text Directly</h3>
-            <textarea
-              className="w-full h-40 p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 resize-none focus:outline-none focus:border-purple-400"
-              placeholder="Paste your business description, offer details, or any text you want analyzed..."
-            />
-          </div>
-
-          {/* File List */}
-          {files.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-xl font-bold text-white mb-4">Selected Files</h3>
-              <div className="space-y-2">
-                {files.map((file, index) => (
-                  <div key={index} className="bg-white/10 rounded-lg p-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <span className="text-2xl mr-3">📄</span>
-                      <div>
-                        <div className="text-white font-medium">{file.name}</div>
-                        <div className="text-gray-400 text-sm">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="text-red-400 hover:text-red-300 text-xl"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+        <div className="max-w-6xl mx-auto">
+          {showResults ? (
+            <div className="space-y-6">
+              {/* Results Header */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-3xl font-bold text-white">Analysis Results</h2>
+                <button
+                  onClick={resetAnalysis}
+                  className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  New Analysis
+                </button>
               </div>
+              
+              {/* Analysis Results */}
+              <AnalysisResults
+                results={analysisResults}
+                onViewAgent={handleViewAgent}
+                onDownloadReport={handleDownloadReport}
+              />
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Upload Zone */}
+              <div
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
+                  dragActive 
+                    ? 'border-purple-400 bg-purple-400/10' 
+                    : 'border-gray-600 hover:border-purple-400'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <div className="text-6xl mb-4">📁</div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Drag & Drop Files Here
+                </h3>
+                <p className="text-gray-400 mb-6">
+                  PDF, Excel, Word documents, business plans, financial statements
+                </p>
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  multiple
+                  accept=".pdf,.txt,.docx,.md,.xlsx,.csv"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg cursor-pointer transition-colors inline-block"
+                >
+                  Select Files
+                </label>
+              </div>
+
+              {/* Text Input */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4">Or Paste Text Directly</h3>
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  className="w-full h-40 p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 resize-none focus:outline-none focus:border-purple-400"
+                  placeholder="Paste your business description, marketing copy, financial data, or any text you want analyzed using Alex Hormozi's frameworks..."
+                />
+              </div>
+
+              {/* File List */}
+              {files.length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-4">Selected Files</h3>
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div key={index} className="bg-white/10 rounded-lg p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="text-2xl mr-3">📄</span>
+                          <div>
+                            <div className="text-white font-medium">{file.name}</div>
+                            <div className="text-gray-400 text-sm">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="text-red-400 hover:text-red-300 text-xl"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Document Analyzer */}
+              <DocumentAnalyzer
+                files={files}
+                textInput={textInput}
+                onAnalysisStart={handleAnalysisStart}
+                onAnalysisComplete={handleAnalysisComplete}
+              />
             </div>
           )}
-
-          {/* Quick Actions */}
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
-            <QuickAction
-              title="Analyze Offers"
-              description="Get 4-prong framework analysis"
-              icon="🎯"
-              onClick={() => {}}
-            />
-            <QuickAction
-              title="Build Money Model"
-              description="Design sequential offers"
-              icon="💰"
-              onClick={() => {}}
-            />
-            <QuickAction
-              title="Calculate Metrics"
-              description="CAC, LTV, payback analysis"
-              icon="📊"
-              onClick={() => {}}
-            />
-          </div>
-
-          {/* Analyze Button */}
-          <div className="text-center mt-12">
-            <button
-              onClick={analyzeFiles}
-              disabled={files.length === 0 || processing}
-              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white text-xl px-12 py-4 rounded-lg transition-colors"
-            >
-              {processing ? (
-                <span className="flex items-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                  Processing with Alex AI...
-                </span>
-              ) : (
-                'Analyze with Alex AI Orchestra'
-              )}
-            </button>
-          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function QuickAction({ title, description, icon, onClick }: {
-  title: string
-  description: string
-  icon: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="bg-white/10 backdrop-blur-lg rounded-xl p-6 hover:bg-white/20 transition-all border border-white/20 text-left"
-    >
-      <div className="text-3xl mb-3">{icon}</div>
-      <h4 className="text-lg font-semibold text-white mb-2">{title}</h4>
-      <p className="text-gray-400 text-sm">{description}</p>
-    </button>
-  )
-}
