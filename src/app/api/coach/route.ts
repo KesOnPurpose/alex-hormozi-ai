@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+// import { SupabaseService } from '@/lib/supabase';
 
-// N8n workflow webhook URLs
+// N8n workflow webhook URLs - only coaching-methodology is currently active
 const N8N_WEBHOOKS = {
-  'master-conductor': 'https://purposewaze.app.n8n.cloud/webhook/master-conductor',
-  'constraint-analyzer': 'https://purposewaze.app.n8n.cloud/webhook/constraint-analyzer',
-  'offer-analyzer': 'https://purposewaze.app.n8n.cloud/webhook/offer-analyzer',
-  'financial-calculator': 'https://purposewaze.app.n8n.cloud/webhook/financial-calculator',
-  'money-model-architect': 'https://purposewaze.app.n8n.cloud/webhook/money-model-architect',
-  'psychology-optimizer': 'https://purposewaze.app.n8n.cloud/webhook/psychology-optimizer',
-  'implementation-planner': 'https://purposewaze.app.n8n.cloud/webhook/implementation-planner',
-  'coaching-methodology': 'https://purposewaze.app.n8n.cloud/webhook/coaching-methodology'
+  'coaching-methodology': 'https://purposewaze.app.n8n.cloud/webhook-test/agent-template'
 };
 
 interface CoachingRequest {
@@ -23,6 +17,7 @@ interface CoachingRequest {
     ltv?: number;
     grossMargin?: number;
   };
+  businessId?: string; // Reference to existing business profile
   sessionType: 'diagnostic' | 'strategic' | 'implementation';
   userId: string;
   agent?: keyof typeof N8N_WEBHOOKS; // Specific agent or let master conductor decide
@@ -40,21 +35,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Start with Master Conductor unless specific agent requested
-    const targetAgent = body.agent || 'master-conductor';
+    // Default to coaching-methodology since it's the only n8n workflow currently active
+    const targetAgent = body.agent || 'coaching-methodology';
     const webhookUrl = N8N_WEBHOOKS[targetAgent];
 
-    if (!webhookUrl) {
+    // If requested agent doesn't have n8n workflow, use coaching-methodology as fallback
+    const activeWebhookUrl = webhookUrl || N8N_WEBHOOKS['coaching-methodology'];
+    
+    if (!activeWebhookUrl) {
       return NextResponse.json(
-        { error: 'Invalid agent specified' },
+        { error: 'No active n8n workflow available' },
         { status: 400 }
       );
     }
 
     console.log(`🎯 Routing to ${targetAgent}: ${body.query.substring(0, 50)}...`);
 
+    // TODO: Save coaching session to database when Supabase is configured
+    const sessionId = Date.now().toString(); // Temporary session ID for testing
+
     // Call N8n webhook
-    const n8nResponse = await fetch(webhookUrl, {
+    const n8nResponse = await fetch(activeWebhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
         },
         sessionType: body.sessionType,
         userId: body.userId,
+        agentType: targetAgent,
         timestamp: new Date().toISOString()
       }),
     });
@@ -79,8 +81,11 @@ export async function POST(request: NextRequest) {
     
     console.log(`✅ ${targetAgent} response received`);
     
+    // TODO: Update the saved session with the N8n response when Supabase is configured
+    
     // Format response for frontend
     const formattedResponse = {
+      sessionId: sessionId,
       agent: targetAgent,
       timestamp: new Date().toISOString(),
       query: body.query,
@@ -98,7 +103,7 @@ export async function POST(request: NextRequest) {
         metrics: result.analysis || result.orchestration || {}
       }],
       
-      actionItems: result.analysis?.prioritizedRecommendations?.map((rec: any, index: number) => ({
+      actionItems: result.analysis?.prioritizedRecommendations?.map((rec: any) => ({
         title: rec.strategy || rec,
         priority: rec.priority === 1 ? 'critical' : rec.priority === 2 ? 'high' : 'medium',
         timeline: rec.timeline || '1-2 weeks',
@@ -190,7 +195,8 @@ export async function GET() {
   return NextResponse.json({
     status: 'healthy',
     message: 'Alex Hormozi AI Coaching API is running',
-    availableAgents: Object.keys(N8N_WEBHOOKS),
+    activeAgents: Object.keys(N8N_WEBHOOKS),
+    defaultAgent: 'coaching-methodology',
     timestamp: new Date().toISOString()
   });
 }
