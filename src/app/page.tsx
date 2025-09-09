@@ -55,7 +55,14 @@ export default function HomePage() {
               <span className="text-sm">Already know your constraint? </span>
               <span className="text-purple-400 underline">Skip to specific frameworks</span>
             </summary>
-            <div className="grid md:grid-cols-2 gap-4 mt-6">
+            <div className="grid md:grid-cols-3 gap-4 mt-6">
+              <ActionCard
+                title="Business Templates"
+                description="Proven frameworks"
+                icon="📋"
+                href="/business-templates"
+                compact={true}
+              />
               <ActionCard
                 title="Constraint Analysis"
                 description="Identify your bottleneck"
@@ -75,6 +82,13 @@ export default function HomePage() {
                 description="Grand Slam Offers"
                 icon="💎"
                 href="/agents/offer-analyzer"
+                compact={true}
+              />
+              <ActionCard
+                title="Progress Tracker"
+                description="Monitor growth"
+                icon="📊"
+                href="/progress"
                 compact={true}
               />
               <ActionCard

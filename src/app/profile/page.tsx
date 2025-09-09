@@ -210,6 +210,10 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-4xl font-bold text-white">Your Business Profile</h1>
             <div className="flex space-x-3">
+              <Link href="/business-templates" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                <span>📋</span>
+                <span>Templates</span>
+              </Link>
               <Link href="/progress" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
                 <span>📊</span>
                 <span>Progress Tracker</span>
