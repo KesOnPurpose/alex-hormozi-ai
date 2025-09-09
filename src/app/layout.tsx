@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavigationHeader from "@/components/layout/NavigationHeader";
+import { FeatureFlagProvider } from "@/contexts/FeatureFlagContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,8 +29,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavigationHeader />
-        {children}
+        <FeatureFlagProvider>
+          <NavigationHeader />
+          {children}
+        </FeatureFlagProvider>
       </body>
     </html>
   );

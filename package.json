@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node test.js",
+    "test:verbose": "node test.js --verbose"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

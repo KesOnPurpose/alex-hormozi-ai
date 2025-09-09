@@ -233,6 +233,24 @@ export default function DashboardPage() {
                 icon="👥"
                 onClick={() => {}}
               />
+              <ActionButton
+                title="A/B Testing"
+                description="Manage experiments and optimization tests"
+                icon="🧪"
+                href="/settings?tab=abtesting"
+              />
+              <ActionButton
+                title="Health Monitoring"
+                description="System performance and uptime monitoring"
+                icon="🏥"
+                href="/settings?tab=monitoring"
+              />
+              <ActionButton
+                title="Test Examples"
+                description="Interactive A/B testing examples"
+                icon="🎯"
+                href="/ab-test-demo"
+              />
             </div>
           </div>
         </div>

@@ -61,12 +61,19 @@ export function RevenueChart({ currentRevenue, targetRevenue, className = '' }: 
       if (isLive) {
         setRevenueData(prevData => {
           const newData = [...prevData];
-          const lastDataPoint = newData[newData.length - 1];
+          const lastIndex = newData.length - 1;
+          const lastDataPoint = newData[lastIndex];
           
           // Update the last data point with small changes
           const change = (Math.random() - 0.5) * (currentRevenue * 0.02);
-          lastDataPoint.revenue = Math.max(0, lastDataPoint.revenue + change);
-          lastDataPoint.projected = lastDataPoint.revenue * 1.15;
+          const newRevenue = Math.max(0, lastDataPoint.revenue + change);
+          
+          // Create new object instead of mutating existing one
+          newData[lastIndex] = {
+            ...lastDataPoint,
+            revenue: newRevenue,
+            projected: newRevenue * 1.15
+          };
           
           return newData;
         });

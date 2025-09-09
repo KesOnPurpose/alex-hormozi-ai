@@ -16,8 +16,12 @@ import {
   Upload,
   Trash2,
   Edit3,
-  Camera
+  Camera,
+  BarChart3,
+  Activity
 } from 'lucide-react';
+import { ABTestingSettings } from '@/components/admin/ABTestingSettings';
+import { HealthMonitoringSettings } from '@/components/admin/HealthMonitoringSettings';
 
 interface UserSettings {
   profile: {
@@ -59,12 +63,20 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'privacy' | 'display'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'privacy' | 'display' | 'abtesting' | 'monitoring'>('profile');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   useEffect(() => {
     loadUserSettings();
+    
+    // Handle URL tab parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    if (tabParam && ['profile', 'preferences', 'privacy', 'display', 'abtesting', 'monitoring'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
   }, []);
 
   const loadUserSettings = () => {
@@ -188,7 +200,9 @@ export default function SettingsPage() {
     { id: 'profile', name: 'Profile', icon: User, description: 'Business information and goals' },
     { id: 'preferences', name: 'Preferences', icon: SettingsIcon, description: 'AI behavior and notifications' },
     { id: 'display', name: 'Display', icon: Palette, description: 'Theme and dashboard layout' },
-    { id: 'privacy', name: 'Privacy', icon: Shield, description: 'Data and privacy controls' }
+    { id: 'privacy', name: 'Privacy', icon: Shield, description: 'Data and privacy controls' },
+    { id: 'abtesting', name: 'A/B Testing', icon: BarChart3, description: 'Experiment management and optimization' },
+    { id: 'monitoring', name: 'Health Monitoring', icon: Activity, description: 'System performance and uptime' }
   ];
 
   return (
@@ -289,6 +303,18 @@ export default function SettingsPage() {
                 onUpdate={(updates) => updateSettings('privacy', updates)}
                 onExportData={exportData}
               />
+            )}
+            
+            {activeTab === 'abtesting' && (
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
+                <ABTestingSettings />
+              </div>
+            )}
+            
+            {activeTab === 'monitoring' && (
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
+                <HealthMonitoringSettings />
+              </div>
             )}
           </div>
         </div>

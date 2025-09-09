@@ -57,16 +57,24 @@ export function CFAChart({ currentCAC, currentGP, className = '' }: CFAChartProp
       if (isLive) {
         setCFAData(prevData => {
           const newData = [...prevData];
-          const lastMonth = newData[newData.length - 1];
+          const lastIndex = newData.length - 1;
+          const lastMonth = newData[lastIndex];
           
           // Small random improvements
           const cacChange = (Math.random() - 0.7) * 5; // Slight CAC reduction bias
           const gpChange = (Math.random() - 0.3) * 50; // Slight GP increase bias
           
-          lastMonth.cac = Math.max(50, lastMonth.cac + cacChange);
-          lastMonth.thirtyDayGP = Math.max(100, lastMonth.thirtyDayGP + gpChange);
-          lastMonth.cfaRatio = lastMonth.thirtyDayGP / lastMonth.cac;
-          lastMonth.cfaAchieved = lastMonth.cfaRatio >= 1.0;
+          const newCac = Math.max(50, lastMonth.cac + cacChange);
+          const newGP = Math.max(100, lastMonth.thirtyDayGP + gpChange);
+          
+          // Create new object instead of mutating existing one
+          newData[lastIndex] = {
+            ...lastMonth,
+            cac: newCac,
+            thirtyDayGP: newGP,
+            cfaRatio: newGP / newCac,
+            cfaAchieved: (newGP / newCac) >= 1.0
+          };
           
           return newData;
         });
