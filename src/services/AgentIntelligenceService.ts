@@ -26,6 +26,49 @@ export type AgentType =
 export type BusinessConstraint = 'leads' | 'sales' | 'delivery' | 'profit' | 'unknown'
 export type BusinessStage = 'complete_beginner' | 'have_business' | 'scaling_business' | 'experienced_operator'
 
+export interface BusinessContext {
+  industry?: string
+  revenue?: number
+  employees?: number
+  timeInBusiness?: number
+  majorChallenges?: string[]
+  currentFocus?: string
+}
+
+export interface ConstraintAnalysis {
+  constraint: BusinessConstraint
+  confidence: number
+  reasoning: string
+  indicators: string[]
+  recommendations: string[]
+}
+
+export interface Discovery {
+  id: string
+  agent: string
+  insight: string
+  impact: 'low' | 'medium' | 'high'
+  actionable: boolean
+  timestamp: string
+}
+
+export interface AgentInteraction {
+  agent: AgentType
+  timestamp: string
+  duration: number
+  insights_generated: number
+  actions_taken: string[]
+  next_recommendations: string[]
+}
+
+export interface SessionData {
+  start_time: string
+  last_activity: string
+  pages_visited: string[]
+  time_spent: number
+  user_inputs: Record<string, unknown>
+}
+
 export interface SharedBusinessIntelligence {
   id: string
   user_id: string
@@ -34,11 +77,11 @@ export interface SharedBusinessIntelligence {
   constraint_confidence?: number
   business_stage?: BusinessStage
   sophistication_score: number
-  business_context: Record<string, any>
-  constraint_analysis: Record<string, any>
-  discoveries: Record<string, any>
-  cross_agent_context: Record<string, any>
-  agent_interactions: any[]
+  business_context: BusinessContext
+  constraint_analysis: ConstraintAnalysis
+  discoveries: Discovery[]
+  cross_agent_context: Record<string, unknown>
+  agent_interactions: AgentInteraction[]
   last_agent_visited?: string
   agent_sequence: string[]
   recommended_next_agent?: string
@@ -47,7 +90,7 @@ export interface SharedBusinessIntelligence {
   total_insights_generated: number
   total_implementations: number
   estimated_revenue_impact: number
-  session_data: Record<string, any>
+  session_data: SessionData
   onboarding_completed: boolean
   analysis_completed: boolean
   created_at: string
@@ -64,19 +107,19 @@ export interface AgentDiscovery {
   discovery_category?: string
   title: string
   description?: string
-  discovery_data: Record<string, any>
+  discovery_data: Record<string, unknown>
   confidence_score?: number
   validation_status: 'pending' | 'validated' | 'implemented' | 'rejected'
-  validation_data: Record<string, any>
+  validation_data: Record<string, unknown>
   expected_impact?: string
   expected_revenue_impact?: number
   expected_timeframe?: string
-  actual_impact?: Record<string, any>
+  actual_impact?: Record<string, unknown>
   actual_revenue_impact?: number
   related_discoveries: string[]
   prerequisite_discoveries: string[]
   implementation_status: 'pending' | 'in_progress' | 'completed' | 'skipped' | 'failed'
-  implementation_data: Record<string, any>
+  implementation_data: Record<string, unknown>
   implementation_notes?: string
   created_at: string
   updated_at: string
@@ -150,7 +193,7 @@ export interface BusinessContext {
   teamSize?: number
   industry?: string
   primaryChallenge?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface DiscoveryInput {
@@ -238,7 +281,7 @@ export class AgentIntelligenceService {
     context: BusinessContext
   ): Promise<boolean> {
     try {
-      const updateData: any = {
+      const updateData: Partial<SharedBusinessIntelligence> = {
         business_context: context,
         updated_at: new Date().toISOString()
       }

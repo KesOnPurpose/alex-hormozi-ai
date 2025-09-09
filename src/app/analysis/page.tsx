@@ -150,10 +150,10 @@ export default function AnalysisPage() {
                 ← Back to Questions
               </Link>
               <h1 className="text-4xl font-bold text-white mb-4">
-                Let's Analyze Your Business 🎯
+                Let&apos;s Analyze Your Business 🎯
               </h1>
               <p className="text-lg text-gray-300">
-                We'll identify your biggest constraint and create an action plan in under 5 minutes
+                We&apos;ll identify your biggest constraint and create an action plan in under 5 minutes
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export default function AnalysisPage() {
                   onClick={() => setCurrentStep(1)}
                   className="text-purple-400 hover:text-purple-300"
                 >
-                  Skip - I'll share this later
+                  Skip - I&apos;ll share this later
                 </button>
                 <button
                   onClick={() => setCurrentStep(1)}
@@ -224,7 +224,7 @@ export default function AnalysisPage() {
                 Upload any documents to get more accurate insights
               </p>
               <p className="text-sm text-gray-400">
-                Don't have files ready? No problem - we'll work with what you provide
+                Don&apos;t have files ready? No problem - we&apos;ll work with what you provide
               </p>
             </div>
 
@@ -292,7 +292,7 @@ export default function AnalysisPage() {
               Analyzing Your Business...
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Alex Hormozi's AI is identifying your primary constraint using insights from 1,260+ business consultations
+              Alex Hormozi&apos;s AI is identifying your primary constraint using insights from 1,260+ business consultations
             </p>
             <div className="bg-gray-700 rounded-full h-2 mb-4">
               <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }} />

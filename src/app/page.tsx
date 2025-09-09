@@ -18,7 +18,7 @@ export default function HomePage() {
           </p>
 
           <div className="text-lg text-gray-400 italic mb-12 max-w-2xl mx-auto">
-            "After meeting with 1,260+ businesses in person, we codified everything into a system that works every time." - Alex Hormozi
+            &quot;After meeting with 1,260+ businesses in person, we codified everything into a system that works every time.&quot; - Alex Hormozi
           </div>
           
           {/* Single Powerful CTA */}
@@ -151,7 +151,7 @@ function PrincipleCard({ quote, principle }: {
   return (
     <div className="bg-white/5 backdrop-blur-lg rounded-lg p-6 border border-white/10">
       <div className="text-purple-400 font-semibold mb-2">{principle}</div>
-      <div className="text-gray-300 italic">"{quote}"</div>
+      <div className="text-gray-300 italic">&quot;{quote}&quot;</div>
     </div>
   )
 }

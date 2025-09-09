@@ -3,13 +3,21 @@
 import Link from 'next/link'
 
 export default function DashboardPage() {
-  // Mock data for demonstration
+  // Mock business metrics data
   const businessMetrics = {
-    cac: 250,
-    thirtyDayGP: 520,
+    cac: 125,
+    thirtyDayGP: 8950,
     ltv: 2400,
-    paybackPeriod: 1.2,
-    level: "Level 2 - Self-Funding Growth"
+    paybackPeriod: 1.8,
+    level: getBusinessLevel(8950)
+  }
+
+  function getBusinessLevel(revenue: number): string {
+    if (revenue === 0) return "Getting Started - Set up your money model"
+    if (revenue < 10000) return "Level 1 - Survival Mode"
+    if (revenue < 30000) return "Level 2 - Self-Funding Growth"
+    if (revenue < 100000) return "Level 3 - Scaling Operations"
+    return "Level 4 - Market Domination"
   }
 
   const recentAnalyses = [
@@ -85,34 +93,48 @@ export default function DashboardPage() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
+          <MetricCard
+            title="Current Revenue"
+            value={`$${businessMetrics.thirtyDayGP.toLocaleString()}`}
+            subtitle="Monthly Revenue"
+            trend="↗ +12%"
+            trendPositive={true}
+          />
+          <MetricCard
+            title="Projected Revenue"
+            value={`$${(businessMetrics.thirtyDayGP * 1.35).toLocaleString()}`}
+            subtitle="Projected Monthly"
+            trend="+35%"
+            trendPositive={true}
+          />
           <MetricCard
             title="CAC"
             value={`$${businessMetrics.cac}`}
             subtitle="Customer Acquisition Cost"
-            trend="+12%"
-            trendPositive={false}
-          />
-          <MetricCard
-            title="30-Day GP"
-            value={`$${businessMetrics.thirtyDayGP}`}
-            subtitle="30-Day Gross Profit"
-            trend="+24%"
-            trendPositive={true}
+            trend={businessMetrics.cac > 0 ? "Active" : "Setup needed"}
+            trendPositive={businessMetrics.cac > 0}
           />
           <MetricCard
             title="LTV"
-            value={`$${businessMetrics.ltv}`}
+            value={`$${businessMetrics.ltv.toLocaleString()}`}
             subtitle="Lifetime Value"
-            trend="+18%"
+            trend={businessMetrics.ltv > businessMetrics.cac * 3 ? "Healthy" : "Needs work"}
+            trendPositive={businessMetrics.ltv > businessMetrics.cac * 3}
+          />
+          <MetricCard
+            title="Active Offers"
+            value="4"
+            subtitle="In Money Model"
+            trend="Multi-tier"
             trendPositive={true}
           />
           <MetricCard
-            title="Payback"
+            title="Payback Period"
             value={`${businessMetrics.paybackPeriod} mo`}
-            subtitle="Payback Period"
-            trend="-0.3 mo"
-            trendPositive={true}
+            subtitle="Break-even Time"
+            trend={businessMetrics.paybackPeriod < 3 ? "Good" : "Improve"}
+            trendPositive={businessMetrics.paybackPeriod < 3}
           />
         </div>
 
