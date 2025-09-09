@@ -6,6 +6,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { OfferNode, ViewMode, MoneyModel, OfferType, MoneyModelTemplate } from '@/types/money-model'
 import ValueLadderCanvas from '@/components/money-model/ValueLadderCanvas'
 import TemplateLibrary from '@/components/money-model/TemplateLibrary'
+import EnhancedOfferDisplay from '@/components/money-model/EnhancedOfferDisplay'
 import { MoneyModelAI } from '@/services/MoneyModelAI'
 import { getTemplateById } from '@/data/moneyModelTemplates'
 import { useHistory } from '@/hooks/useHistory'
@@ -660,34 +661,25 @@ export default function MoneyModelBuilder() {
                     </div>
                   )}
 
-                  {/* Offer List */}
+                  {/* Enhanced Offer List */}
                   <div>
-                    <h4 className="text-white font-semibold mb-4">All Offers ({offers.length})</h4>
-                    <div className="space-y-3">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-white font-semibold">All Offers ({offers.length})</h4>
+                      <div className="flex items-center space-x-2 text-xs">
+                        <span className="text-gray-400">Enhanced View</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
                       {offers.map(offer => (
-                        <div 
+                        <EnhancedOfferDisplay
                           key={offer.id}
-                          onClick={() => setSelectedOfferId(offer.id)}
-                          className="bg-white/5 hover:bg-white/10 rounded-xl p-4 cursor-pointer transition-colors"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-3">
-                              <span className="text-xl">{offer.type === 'attraction' ? '🎯' : offer.type === 'core' ? '💎' : offer.type === 'upsell' ? '📈' : offer.type === 'downsell' ? '🔄' : '🔁'}</span>
-                              <div>
-                                <div className="text-white font-semibold">{offer.name}</div>
-                                <div className="text-gray-400 text-sm capitalize">{offer.type}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-white font-bold">{formatCurrency(offer.price)}</div>
-                              <div className="text-green-400 text-sm">{formatCurrency(offer.metrics.currentMonthlyRevenue)}/mo</div>
-                            </div>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Conversion: {offer.metrics.conversionRate}%</span>
-                            <span className="text-gray-400">Customers: {offer.metrics.customersPerMonth}/mo</span>
-                          </div>
-                        </div>
+                          offer={offer}
+                          onOfferSelect={setSelectedOfferId}
+                          isSelected={offer.id === selectedOfferId}
+                          showFullDetails={!selectedOffer}
+                          formatCurrency={formatCurrency}
+                        />
                       ))}
                     </div>
                   </div>

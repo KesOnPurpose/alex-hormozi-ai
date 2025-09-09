@@ -58,6 +58,9 @@ export interface OfferNode {
   size: { width: number; height: number }
   color?: string
   
+  // Enhanced Copy & Messaging
+  copy?: OfferCopy
+  
   // Detailed Metrics (for text mode)
   metrics: OfferMetrics
   
@@ -78,6 +81,56 @@ export interface OfferNode {
   createdAt: string
   updatedAt: string
   tags: string[]
+}
+
+export interface OfferCopy {
+  // Value Proposition
+  headline: string
+  subheadline: string
+  valueProposition: string
+  
+  // Social Proof
+  testimonialSnippets: string[]
+  socialProofMetrics: {
+    customersServed: number
+    successRate: number
+    averageResult: string
+  }
+  
+  // Psychological Triggers  
+  urgencyIndicator: {
+    type: 'scarcity' | 'time-sensitive' | 'seasonal' | 'launch'
+    message: string
+    deadline?: string
+  }
+  
+  riskReversal: {
+    guarantee: string
+    trial: string
+    refundPolicy: string
+  }
+  
+  // Value Stacking
+  perceivedValue: number
+  valueBreakdown: Array<{
+    component: string
+    value: number
+    description: string
+  }>
+  
+  // Call to Action
+  ctaVariations: Array<{
+    primary: string
+    urgency: string
+    benefit: string
+  }>
+  
+  // Objection Handling
+  commonObjections: Array<{
+    objection: string
+    response: string
+    evidence: string
+  }>
 }
 
 export interface MoneyModel {

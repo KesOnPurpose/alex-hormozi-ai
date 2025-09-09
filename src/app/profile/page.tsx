@@ -209,9 +209,19 @@ export default function ProfilePage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-4xl font-bold text-white">Your Business Profile</h1>
-            <Link href="/agents" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
-              Continue Coaching
-            </Link>
+            <div className="flex space-x-3">
+              <Link href="/progress" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                <span>📊</span>
+                <span>Progress Tracker</span>
+              </Link>
+              <Link href="/settings" className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                <span>⚙️</span>
+                <span>Settings</span>
+              </Link>
+              <Link href="/agents" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                Continue Coaching
+              </Link>
+            </div>
           </div>
           <p className="text-gray-300">Track your business transformation journey with Alex Hormozi AI</p>
         </div>

@@ -1,6 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
+import { CFAChart } from '@/components/dashboard/CFAChart'
+import { LiveMetricCard } from '@/components/dashboard/LiveMetricCard'
+import { ConstraintTracker } from '@/components/dashboard/ConstraintTracker'
 
 export default function DashboardPage() {
   // Mock business metrics data
@@ -92,49 +96,84 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Key Metrics */}
+        {/* Live Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
-          <MetricCard
-            title="Current Revenue"
-            value={`$${businessMetrics.thirtyDayGP.toLocaleString()}`}
-            subtitle="Monthly Revenue"
-            trend="↗ +12%"
+          <LiveMetricCard
+            title="Monthly Revenue"
+            value={businessMetrics.thirtyDayGP}
+            subtitle="Current Revenue"
+            format="currency"
+            target={businessMetrics.thirtyDayGP * 1.5}
             trendPositive={true}
+            volatility={0.03}
           />
-          <MetricCard
+          <LiveMetricCard
             title="Projected Revenue"
-            value={`$${(businessMetrics.thirtyDayGP * 1.35).toLocaleString()}`}
-            subtitle="Projected Monthly"
-            trend="+35%"
+            value={businessMetrics.thirtyDayGP * 1.35}
+            subtitle="Growth Projection"
+            format="currency"
             trendPositive={true}
+            volatility={0.05}
           />
-          <MetricCard
+          <LiveMetricCard
             title="CAC"
-            value={`$${businessMetrics.cac}`}
+            value={businessMetrics.cac}
             subtitle="Customer Acquisition Cost"
-            trend={businessMetrics.cac > 0 ? "Active" : "Setup needed"}
-            trendPositive={businessMetrics.cac > 0}
+            format="currency"
+            target={100}
+            trendPositive={false}
+            volatility={0.02}
           />
-          <MetricCard
+          <LiveMetricCard
             title="LTV"
-            value={`$${businessMetrics.ltv.toLocaleString()}`}
+            value={businessMetrics.ltv}
             subtitle="Lifetime Value"
-            trend={businessMetrics.ltv > businessMetrics.cac * 3 ? "Healthy" : "Needs work"}
-            trendPositive={businessMetrics.ltv > businessMetrics.cac * 3}
-          />
-          <MetricCard
-            title="Active Offers"
-            value="4"
-            subtitle="In Money Model"
-            trend="Multi-tier"
+            format="currency"
+            target={3000}
             trendPositive={true}
+            volatility={0.04}
           />
-          <MetricCard
+          <LiveMetricCard
+            title="Active Offers"
+            value={4}
+            subtitle="In Money Model"
+            format="number"
+            target={6}
+            trendPositive={true}
+            volatility={0.01}
+          />
+          <LiveMetricCard
             title="Payback Period"
-            value={`${businessMetrics.paybackPeriod} mo`}
-            subtitle="Break-even Time"
-            trend={businessMetrics.paybackPeriod < 3 ? "Good" : "Improve"}
-            trendPositive={businessMetrics.paybackPeriod < 3}
+            value={businessMetrics.paybackPeriod}
+            subtitle="Break-even Time (months)"
+            format="number"
+            target={1}
+            trendPositive={false}
+            volatility={0.02}
+          />
+        </div>
+
+        {/* Analytics Charts */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+          <RevenueChart 
+            currentRevenue={businessMetrics.thirtyDayGP}
+            targetRevenue={businessMetrics.thirtyDayGP * 1.5}
+          />
+          <CFAChart 
+            currentCAC={businessMetrics.cac}
+            currentGP={businessMetrics.thirtyDayGP}
+          />
+        </div>
+
+        {/* Constraint Analysis */}
+        <div className="mb-12">
+          <ConstraintTracker 
+            businessData={{
+              leads: 150,
+              conversionRate: 18,
+              customerSatisfaction: 82,
+              profitMargin: 45
+            }}
           />
         </div>
 
