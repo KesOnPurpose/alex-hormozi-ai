@@ -103,7 +103,72 @@ export default function ChatPage() {
         sessionType
       };
 
-      const response = await conductor.current.conductCoachingSession(session);
+      // Enhanced agent routing based on query content
+      let targetAgent = 'master-conductor';
+      
+      // Implementation Planner triggers
+      if (query.toLowerCase().includes('implementation plan') || 
+          query.toLowerCase().includes('90-day') || 
+          query.toLowerCase().includes('roadmap') ||
+          query.toLowerCase().includes('step-by-step') ||
+          query.toLowerCase().includes('timeline')) {
+        targetAgent = 'implementation-planner';
+      }
+      // Constraint Analyzer triggers  
+      else if (query.toLowerCase().includes('constraint') || 
+               query.toLowerCase().includes('bottleneck') ||
+               query.toLowerCase().includes('limiting') ||
+               query.toLowerCase().includes('stuck') ||
+               query.toLowerCase().includes('plateau')) {
+        targetAgent = 'constraint-analyzer';
+      }
+      // Offer Analyzer triggers
+      else if (query.toLowerCase().includes('offer') ||
+               query.toLowerCase().includes('grand slam') ||
+               query.toLowerCase().includes('value equation') ||
+               query.toLowerCase().includes('conversion') && query.toLowerCase().includes('rate')) {
+        targetAgent = 'offer-analyzer';
+      }
+      // Financial Calculator triggers
+      else if (query.toLowerCase().includes('cac') ||
+               query.toLowerCase().includes('ltv') ||
+               query.toLowerCase().includes('client financed') ||
+               query.toLowerCase().includes('advertising level') ||
+               query.toLowerCase().includes('roi')) {
+        targetAgent = 'financial-calculator';
+      }
+      // Money Model Architect triggers
+      else if (query.toLowerCase().includes('money model') ||
+               query.toLowerCase().includes('4-prong') ||
+               query.toLowerCase().includes('revenue stream') ||
+               query.toLowerCase().includes('upsell') && query.toLowerCase().includes('downsell')) {
+        targetAgent = 'money-model-architect';
+      }
+      // Psychology Optimizer triggers
+      else if (query.toLowerCase().includes('psychology') ||
+               query.toLowerCase().includes('upsell moment') ||
+               query.toLowerCase().includes('completion rate') ||
+               query.toLowerCase().includes('objection')) {
+        targetAgent = 'psychology-optimizer';
+      }
+      // Coaching Methodology triggers
+      else if (query.toLowerCase().includes('coach') ||
+               query.toLowerCase().includes('systematic') ||
+               query.toLowerCase().includes('framework') ||
+               query.toLowerCase().includes('methodology')) {
+        targetAgent = 'coaching-methodology';
+      }
+      
+      const apiResponse = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...session,
+          agent: targetAgent
+        })
+      });
+      
+      const response = await apiResponse.json();
       const executionTime = Date.now() - startTime;
       
       // Extract constraint analysis from agent responses
@@ -552,10 +617,41 @@ export default function ChatPage() {
             
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-xl">
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin h-4 w-4 border-2 border-purple-400 border-t-transparent rounded-full"></div>
-                    <span className="text-white">Alex is analyzing your request...</span>
+                <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-xl max-w-md">
+                  <div className="flex items-start space-x-3">
+                    <div className="animate-spin h-5 w-5 border-2 border-purple-400 border-t-transparent rounded-full mt-1 flex-shrink-0"></div>
+                    <div className="space-y-2">
+                      <div className="text-white font-medium">
+                        {(() => {
+                          const query = currentQuery.toLowerCase();
+                          if (query.includes('implementation') || query.includes('90-day') || query.includes('roadmap')) {
+                            return '📋 Implementation Planner working...';
+                          } else if (query.includes('constraint') || query.includes('stuck') || query.includes('plateau')) {
+                            return '🎯 Constraint Analyzer investigating...';
+                          } else if (query.includes('offer') || query.includes('grand slam')) {
+                            return '💎 Offer Analyzer optimizing...';
+                          } else if (query.includes('cac') || query.includes('ltv') || query.includes('client financed')) {
+                            return '📊 Financial Calculator computing...';
+                          } else if (query.includes('money model') || query.includes('4-prong')) {
+                            return '🏗️ Money Model Architect designing...';
+                          } else if (query.includes('psychology') || query.includes('upsell moment')) {
+                            return '🧠 Psychology Optimizer analyzing...';
+                          } else if (query.includes('coach') || query.includes('systematic')) {
+                            return '🎓 Coaching Methodology applying...';
+                          } else {
+                            return '🎯 Master Conductor orchestrating...';
+                          }
+                        })()}
+                      </div>
+                      <div className="text-gray-300 text-sm space-y-1">
+                        <div>• Analyzing business context</div>
+                        <div>• Applying Alex Hormozi frameworks</div>
+                        <div>• Generating strategic recommendations</div>
+                        <div className="text-xs text-gray-400 mt-2">
+                          This may take 30-40 seconds for comprehensive analysis
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

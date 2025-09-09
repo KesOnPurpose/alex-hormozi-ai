@@ -48,8 +48,8 @@ export class MainConductor {
   private n8nBaseUrl: string;
 
   constructor() {
-    // N8n webhook URLs - update these with your N8n instance URL
-    this.n8nBaseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://purposewaze.app.n8n.cloud/webhook';
+    // N8n webhook URLs - using environment variables
+    this.n8nBaseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://purposewaze.app.n8n.cloud/webhook-test';
   }
 
   async conductCoachingSession(session: CoachingSession): Promise<CoachingResponse> {
@@ -441,7 +441,7 @@ export class MainConductor {
   // Master Conductor N8n Workflow Integration
   private async callMasterConductor(query: string, businessContext: BusinessContext, sessionType: string): Promise<any> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/master-conductor`, {
+      const response = await fetch(process.env.N8N_MASTER_CONDUCTOR || `${this.n8nBaseUrl}/master-conductor`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -469,7 +469,7 @@ export class MainConductor {
   // Individual Agent N8n Workflow Integration Methods
   private async callOfferAnalyzer(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/offer-analyzer`, {
+      const response = await fetch(process.env.N8N_OFFER_ANALYZER || `${this.n8nBaseUrl}/offer-analyzer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -500,7 +500,7 @@ export class MainConductor {
 
   private async callFinancialCalculator(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/financial-calculator`, {
+      const response = await fetch(process.env.N8N_FINANCIAL_CALCULATOR || `${this.n8nBaseUrl}/financial-calculator`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -531,7 +531,7 @@ export class MainConductor {
 
   private async callMoneyModelArchitect(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/money-model-architect`, {
+      const response = await fetch(process.env.N8N_MONEY_MODEL_ARCHITECT || `${this.n8nBaseUrl}/money-model-architect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -562,7 +562,7 @@ export class MainConductor {
 
   private async callPsychologyOptimizer(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/psychology-optimizer`, {
+      const response = await fetch(process.env.N8N_PSYCHOLOGY_OPTIMIZER || `${this.n8nBaseUrl}/psychology-optimizer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -593,7 +593,7 @@ export class MainConductor {
 
   private async callImplementationPlanner(query: string, businessContext: BusinessContext, sessionType: string, otherAnalyses: AgentAnalysis[]): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/implementation-planner`, {
+      const response = await fetch(process.env.N8N_IMPLEMENTATION_PLANNER || `${this.n8nBaseUrl}/implementation-planner`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -792,7 +792,7 @@ export class MainConductor {
   // New Agent Integration Methods
   private async callConstraintAnalyzer(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/constraint-analyzer`, {
+      const response = await fetch(process.env.N8N_CONSTRAINT_ANALYZER || `${this.n8nBaseUrl}/constraint-analyzer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -823,7 +823,7 @@ export class MainConductor {
 
   private async callCoachingMethodology(query: string, businessContext: BusinessContext, sessionType: string): Promise<AgentAnalysis> {
     try {
-      const response = await fetch(`${this.n8nBaseUrl}/coaching-methodology-webhook`, {
+      const response = await fetch(process.env.N8N_COACHING_METHODOLOGY || `${this.n8nBaseUrl}/coaching-methodology`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
